@@ -1,129 +1,165 @@
-# Corallium Flow — Kesiapan Google Play Console
+# Corallium Flow — audit kesiapan Play Console
 
-> Semakan pada **26 Ogos 2026**.
->
-> **Nota penting:** dokumen ini ialah peta keperluan Play Console, **bukan** audit projek.
-> Ia ditulis dalam sesi yang berjalan pada klon repositori ini, yang setakat ini
-> mengandungi `README.md` sahaja — tiada kod Android. Tiada satu pun item di bawah
-> disahkan terhadap kod Corallium Flow yang sebenar.
+Audit terhadap kod sebenar dalam `arunghayatsports-ui/corallium-test`,
+pada `main` = `397a50b` (26 Ogos 2026, 11:17 +08).
 
-## Jawapan ringkas
-
-**Tidak — kerja kod tidak meliputi semua yang ada dalam Play Console.**
-
-Play Console ada dua lapisan berasingan:
-
-1. **Lapisan aplikasi** — `targetSdk`, AAB, penandatanganan, pustaka bil, kebenaran,
-   kestabilan. Inilah yang disentuh oleh kerja kod.
-2. **Lapisan Console** — borang dasar, deklarasi, aset kedai, persediaan monetisasi,
-   trek ujian. **Tiada satu pun boleh diselesaikan dengan menulis kod.**
-
-Bagi kebanyakan aplikasi, lapisan kedua inilah yang melambatkan pelancaran.
+Seni bina: Next.js + Capacitor, WebView jauh ke `https://www.corallium.my/dashboard/flow`.
+`applicationId` `my.corallium.flow`, versionCode 4, versionName 1.3.
 
 ---
 
-## Tiga sekatan teknikal
+## Pembetulan kepada versi terdahulu dokumen ini
 
-| Keperluan | Tarikh kuat kuasa | Lanjutan |
-|---|---|---|
-| Sasar Android 16 (API 36) — aplikasi baharu dan kemas kini | **31 Ogos 2026** | 1 Nov 2026 |
-| Play Billing Library 8.0.0+ | **31 Ogos 2026** | 1 Nov 2026 |
-| Sokongan saiz halaman memori 16 KB (aplikasi sasar Android 15+) | 1 Nov 2025 | sudah berkuat kuasa |
+Versi pertama dokumen ini ditulis tanpa akses kepada kod, dan menyenaraikan dua
+tarikh mati 31 Ogos 2026 sebagai mendesak. **Kedua-duanya tidak terpakai:**
 
-Lanjutan bagi dua item pertama dipohon melalui borang dalam Play Console.
+- `targetSdkVersion = 36` sudah ditetapkan dalam `android/variables.gradle`.
+- Tiada integrasi Play Billing langsung dalam repo — carian `billingclient`
+  pulang kosong. Keperluan Play Billing Library 8 tidak berkenaan.
 
----
-
-## Peta jurang
-
-Legenda: **[Kod]** selesai dari sisi aplikasi · **[Kod+Console]** perlu kedua-duanya dan
-mesti sepadan · **[Console]** kod tidak boleh sentuh langsung.
-
-### A. Lapisan aplikasi
-
-- **[Kod]** Format AAB dan Play App Signing
-- **[Kod]** Integrasi Play Billing dalam aplikasi (aliran beli, sahkan resit, pulih pembelian)
-- **[Kod]** Kestabilan, ProGuard/R8, kebenaran minimum
-
-### B. App content — borang dasar (semua wajib)
-
-- **[Console]** Dasar privasi — URL awam, boleh dicapai tanpa log masuk
-- **[Kod+Console]** **Borang Data safety** — punca penolakan paling kerap. Mesti sepadan
-  dengan kelakuan sebenar aplikasi, termasuk data yang dikumpul oleh SDK pihak ketiga
-- **[Console]** Penilaian kandungan (soal selidik IARC)
-- **[Console]** Target audience and content — jika ada kumpulan kanak-kanak, dasar Families terpakai
-- **[Console]** App access — akaun ujian yang berfungsi jika aplikasi perlu log masuk
-- **[Console]** Deklarasi iklan; kebenaran `AD_ID` jika `targetSdk` 33+
-- **[Kod+Console]** Penghapusan akaun — laluan dalam aplikasi **dan** URL web
-- **[Kod+Console]** Deklarasi bersyarat: jenis foreground service (Android 14+), akses semua
-  fail, kebenaran foto/video, `QUERY_ALL_PACKAGES`, ciri kewangan, kesihatan, berita
-
-### C. Penyenaraian kedai
-
-- **[Console]** Nama (30 aksara), penerangan ringkas (80), penerangan penuh (4000); `ms-MY` + `en-US`
-- **[Console]** Ikon 512×512 PNG, grafik ciri 1024×500, 2–8 tangkapan skrin telefon,
-  tangkapan skrin tablet 7" dan 10"
-- **[Console]** Kategori, tag, e-mel sokongan (dipaparkan awam), tapak web
-
-### D. Monetisasi — sisi Console
-
-- **[Console]** Profil pembayaran pedagang — pengesahan mengambil masa berhari-hari, mulakan awal
-- **[Console]** Tetapan cukai dan pematuhan (termasuk layanan cukai Malaysia)
-- **[Kod+Console]** Produk dalam aplikasi dan langganan — setiap ID dalam kod mesti wujud
-  di Console **dan** berstatus aktif; base plan, tawaran, tempoh tangguh, account hold
-- **[Console]** Harga bagi setiap wilayah yang diedarkan
-- **[Console]** Penguji lesen — satu-satunya cara menguji pembelian tanpa dicaj
-- **[Kod+Console]** Pemberitahuan pembangun masa nyata (topik Pub/Sub)
-
-### E. Ujian dan pelancaran
-
-- **[Console]** **Ujian tertutup: 12 penguji, 14 hari berterusan.** Terpakai kepada akaun
-  peribadi yang dibuka selepas 13 Nov 2023. Jam berulang semula jika penguji jatuh bawah 12.
-  Sejak 2026 Google turut menyemak penggunaan sebenar, bukan sekadar pendaftaran
-- **[Console]** Permohonan akses produksi — borang berasingan selepas syarat 12/14 dipenuhi
-- **[Kod+Console]** Pre-launch report — semak amaran ranap, kebolehcapaian, keselamatan
-- **[Kod+Console]** Android vitals — ambang kelakuan buruk: ranap 1.09%, ANR 0.47%
+Dokumen `MIGRASI_31_OGOS_2026.md` telah dipadam atas sebab yang sama.
 
 ---
 
-## Susunan kerja
+## Sudah disahkan siap
 
-Jam 14 hari ialah item terpanjang, jadi ia perlu bermula seawal mungkin — tetapi ia hanya
-boleh bermula selepas AAB yang sah berjaya dimuat naik.
+| Perkara | Bukti dalam kod |
+|---|---|
+| Target API 36 | `android/variables.gradle`: `compileSdkVersion = 36`, `targetSdkVersion = 36` |
+| Saiz halaman 16 KB | AGP 8.13.0 + Gradle 8.14.3; tiada `.so` dikomit. Toolchain moden menjajarkan 16 KB secara lalai |
+| Tiada Play Billing untuk dimigrasi | Tiada rujukan `billingclient` di seluruh repo |
+| Gerbang penandatanganan | `android/app/build.gradle` — `gradle.taskGraph.whenReady` menggagalkan `bundleRelease` tanpa `key.properties`, dengan `signingConfig` tanpa syarat sebagai jaring kedua |
+| Sandaran sesi ditutup | `allowBackup="false"` — menghalang kuki `app_webview/` dipulihkan dalam keadaan sudah log masuk |
+| Halaman padam akaun | `app/padam-akaun/page.tsx` — memenuhi keperluan URL web Play |
+| Dasar privasi | `app/privasi/page.tsx` + `lib/i18n/legal/privacy-content.ts` |
+| Mitigasi dasar pembayaran | `components/flow/web-purchase-guard.tsx`, diguna pada `flow-pricing-page.tsx` dan `flow-plan-limit-notice.tsx` |
+| Manifest bersih | Sumber `AndroidManifest.xml` mengisytihar `INTERNET` sahaja |
 
-1. **Hari ini** — Sahkan dua nombor: `targetSdk` dan versi Play Billing Library.
-   Jika tidak sempat sebelum 31 Ogos, mohon lanjutan sekarang. Buka juga **Policy status**
-   dalam Console; ia menyenaraikan setiap isu terbuka secara terus.
-2. **Minggu ini** — Naik taraf ke API 36 dan PBL 8. Migrasi PBL 7→8 mengubah beberapa API
-   langganan, jadi uji semula aliran pembelian sepenuhnya, bukan hanya kompil.
-3. **Selari** — Mulakan profil pembayaran pedagang. Pengesahan tidak boleh dipercepatkan.
-4. **Selepas (2)** — Muat naik AAB ke trek ujian tertutup dan mulakan jam 14 hari.
-   Ambil 15–16 penguji, bukan 12 tepat. Galakkan penggunaan sebenar.
-5. **Semasa 14 hari** — Habiskan semua borang App content. Beri masa paling banyak kepada
-   Data safety: senaraikan setiap SDK dahulu, kemudian isytihar data setiap satunya.
-6. **Semasa 14 hari** — Siapkan aset kedai; cipta dan aktifkan setiap produk; tambah penguji
-   lesen dan lakukan satu pembelian ujian hujung ke hujung bagi setiap produk.
-7. **Selepas 14 hari** — Mohon akses produksi. Jawab dengan terperinci: apa yang diuji,
-   maklum balas apa yang diterima, apa yang berubah hasilnya.
-8. **Pelancaran** — Berperingkat pada 10–20%, perhati Android vitals, kemudian naikkan.
+Penyekat dasar privasi yang dicatat dalam `docs/FLOW_ANDROID_RELEASE.md`
+(placeholder `[ISI NAMA ENTITI]` dan `No. SSM [ISI]`) **sudah tiada** —
+carian pada `lib/i18n/legal/` tidak menjumpai satu pun placeholder.
+Catatan penyekat itu kini basi.
 
 ---
 
-## Untuk semakan sebenar terhadap kod
+## Jurang A — dokumen keupayaan asli sudah basi, dan ia menyuap borang Data safety
 
-Salah satu daripada ini diperlukan:
+`docs/FLOW_ANDROID_RELEASE.md` menyenaraikan keupayaan asli setakat
+**versionCode 2 / versionName 1.1**, dan menandakan push notification sebagai
+**TIADA** — "Memerlukan Firebase; belum dibina". Kesimpulannya:
 
-- Tolak kod Corallium Flow ke repositori GitHub — kemudian `build.gradle`,
-  `AndroidManifest.xml` dan integrasi bil boleh dibaca terus.
-- Atau sambung semula sesi Claude Code di komputer tempatan tempat kod itu berada.
-- Untuk jurang sisi Console: tangkapan skrin halaman **Policy status** dan **Dashboard**
-  sudah memadai — kedua-duanya menyenaraikan item tertunggak secara eksplisit.
+> Jadi manifes kekal `INTERNET` sahaja, dan **tiada pengisytiharan kebenaran
+> diperlukan dalam Play Console**.
+
+Itu tidak lagi benar. Kod sekarang:
+
+- `android/app/capacitor.build.gradle` mengkompil `implementation project(':capacitor-push-notifications')`
+- `lib/flow/platform/push.ts` melaksanakan pendaftaran FCM sepenuhnya
+- Aplikasi kini pada versionCode 4 / versionName 1.3
+
+`@capacitor/push-notifications` mengisytihar `POST_NOTIFICATIONS` dalam
+manifestnya sendiri, dan manifest itu **bergabung** ke dalam manifest akhir.
+Jadi manifest tergabung bukan lagi `INTERNET` sahaja, walaupun sumbernya begitu.
+
+Ini tepat kegagalan yang dokumen itu sendiri beri amaran — "Dokumen itu
+mendahului kod, dan borang Play Console yang diisi daripadanya akan mengandungi
+dakwaan yang artifak tidak sokong" — cuma kini arahnya terbalik: dokumen
+**kurang** melaporkan apa yang artifak bawa.
+
+**Tindakan:** sahkan manifest tergabung, bukan sumbernya, sebelum mengisi
+sebarang borang:
+
+```bash
+cd android && ./gradlew :app:processReleaseManifest
+# kemudian baca app/build/intermediates/merged_manifests/release/AndroidManifest.xml
+```
+
+Kemas kini jadual dalam `FLOW_ANDROID_RELEASE.md` supaya sepadan versionCode 4.
 
 ---
 
-## Rujukan
+## Jurang B — push ada dalam artifak tetapi tidak dikonfigur
 
-- [Keperluan target API level](https://developer.android.com/google/play/requirements/target-sdk)
-- [Penamatan versi Play Billing Library](https://developer.android.com/google/play/billing/deprecation-faq)
-- [Sokongan saiz halaman 16 KB](https://developer.android.com/guide/practices/page-sizes)
-- [Keperluan ujian akaun peribadi](https://support.google.com/googleplay/android-developer/answer/14151465)
+`google-services.json` tiada dalam repo. Tanpanya,
+`com.google.gms.google-services` tidak digunakan dan pendaftaran FCM gagal —
+`push.ts` menelan kegagalan itu secara senyap, dengan sengaja.
+
+Kesan bersihnya: aplikasi menghantar kebenaran notifikasi untuk ciri yang tidak
+pernah berfungsi. Pengguna melihat gesaan; tiada notifikasi pernah tiba.
+
+**Putuskan sebelum penghantaran — dua pilihan sahaja:**
+
+1. **Tambah `google-services.json`** dan hidupkan push. Maka token FCM ialah
+   pengecam peranti, dan **mesti** diisytihar dalam borang Data safety
+   (kategori: Device or other IDs), berserta perkongsian kepada Google.
+2. **Buang plugin push** daripada binaan. `POST_NOTIFICATIONS` kemudian keluar
+   daripada manifest tergabung, dan borang Data safety kekal lebih ringkas.
+
+Menghantar dalam keadaan sekarang — plugin ada, konfigurasi tiada — ialah
+pilihan paling teruk daripada kedua-duanya.
+
+---
+
+## Jurang C — `allowNavigation` tidak dapat membezakan dua jenis bayaran
+
+`capacitor.config.ts` membenarkan navigasi ke `*.billplz.com` dan `billplz.com`.
+Sebabnya sah dan dinyatakan dalam kod: pelanggan pemilik perniagaan membayar
+kutipan melalui navigasi, dan tanpa hos itu "Bayar sekarang" mati senyap dalam
+WebView. Bayaran untuk **kerja perkhidmatan dunia sebenar** memang dikecualikan
+daripada Play Billing.
+
+Tetapi senarai itu di peringkat **hos**, bukan laluan. Hos yang sama juga akan
+membenarkan checkout **langganan Flow** dibuka di dalam aplikasi — dan itulah
+tepat yang `WebPurchaseGuard` wujud untuk halang.
+
+Guard itu menyembunyikan **CTA** selepas hidrasi. Ia tidak menghalang
+**navigasi**. Pengguna yang tiba di URL checkout langganan secara langsung —
+melalui penanda buku, pautan e-mel yang dibuka dalam aplikasi, atau ubah hala
+selepas sesuatu aliran — masih akan mendarat pada Billplz di dalam WebView.
+
+**Tindakan:** sahkan bahawa tiada laluan checkout langganan boleh dicapai dalam
+bungkusan native. Kalau ada, halang di peringkat navigasi (bukan hanya CTA),
+atau paksa ia dibuka dalam pelayar luaran.
+
+---
+
+## Jurang D — Minimum Functionality
+
+`capacitor.config.ts` sendiri mencatat risiko ini:
+
+> aplikasi yang hanya membungkus laman web tanpa keupayaan asli tertakluk kepada
+> dasar "Minimum Functionality" Google Play dan berisiko ditolak
+
+Mitigasinya sudah ada — kamera, share, dan push ialah keupayaan asli sebenar.
+Sediakan nota kepada penyemak dalam medan **App access** yang menyebut secara
+khusus di mana keupayaan asli itu digunakan (butang "Ambil foto" pada bukti
+kerja, "Hantar pautan" pada sebut harga), supaya penyemak tidak melihatnya
+sebagai pelayar semata-mata.
+
+---
+
+## Yang tinggal di sisi Console
+
+Tiada satu pun boleh diselesaikan dengan kod:
+
+- [ ] Borang **Data safety** — bergantung pada keputusan Jurang B
+- [ ] **Penilaian kandungan** (soal selidik IARC)
+- [ ] **Target audience and content**
+- [ ] **App access** — akaun ujian berfungsi + nota keupayaan asli (Jurang D)
+- [ ] **Aset kedai** — ikon 512×512, grafik ciri 1024×500, 2–8 tangkapan skrin telefon, tangkapan skrin tablet 7" dan 10"
+- [ ] **Ujian tertutup** — 12 penguji, 14 hari berterusan (akaun peribadi selepas 13 Nov 2023); sejak 2026 Google turut menyemak penggunaan sebenar
+- [ ] **Permohonan akses produksi** selepas syarat 12/14 dipenuhi
+- [ ] **Pre-launch report** dan ambang Android vitals (ranap 1.09%, ANR 0.47%)
+
+---
+
+## Nota kecil
+
+`minifyEnabled false` pada buildType release. Bukan penyekat Play, tetapi ia
+bermakna tiada R8 — saiz artifak lebih besar dan tiada obfuskasi. Untuk shell
+WebView yang hampir tiada logik Java, kesannya kecil.
+
+Dasar privasi tidak menamakan entiti undang-undang atau nombor SSM; ia
+menyenaraikan e-mel hubungan sahaja. Play tidak mewajibkan nombor SSM, tetapi
+identiti pembangun yang disahkan akan dipaparkan pada senarai kedai secara
+berasingan.
