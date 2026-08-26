@@ -111,7 +111,7 @@ penguji lesen:
 
 ### Risiko tertinggi: penguatkuasaan edge-to-edge
 
-**Tiada opt-out.** Atribut `windows OptOutEdgeToEdgeEnforcement` kini dinyahaktifkan pada
+**Tiada opt-out.** Atribut `windowOptOutEdgeToEdgeEnforcement` kini dinyahaktifkan pada
 peranti Android 16. Setiap aplikasi yang menyasar API 36 mesti mengendalikan window insets
 dengan betul, jika tidak antara muka akan terpotong di bawah bar status dan bar navigasi.
 
