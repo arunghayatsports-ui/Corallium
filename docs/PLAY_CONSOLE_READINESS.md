@@ -108,9 +108,16 @@ kutipan melalui navigasi, dan tanpa hos itu "Bayar sekarang" mati senyap dalam
 WebView. Bayaran untuk **kerja perkhidmatan dunia sebenar** memang dikecualikan
 daripada Play Billing.
 
-Tetapi senarai itu di peringkat **hos**, bukan laluan. Hos yang sama juga akan
-membenarkan checkout **langganan Flow** dibuka di dalam aplikasi — dan itulah
+Tetapi senarai itu di peringkat **hos**, bukan laluan. Hos yang sama juga
+membenarkan bayaran **langganan Flow** dibuka di dalam aplikasi — dan itulah
 tepat yang `WebPurchaseGuard` wujud untuk halang.
+
+Kedudukannya lebih baik daripada yang disangka pada mulanya: dasar privasi
+menyatakan yuran langganan dibayar kepada Corallium Tech **melalui invois**,
+dengan pindahan bank atau FPX — bukan checkout layan diri dalam aplikasi. Jadi
+tiada halaman checkout langganan untuk ditemui secara tidak sengaja. Yang
+tinggal ialah **pautan bayar invois**: kalau pautan itu boleh dibuka di dalam
+WebView, ia bayaran langganan digital di luar Play Billing dari dalam aplikasi.
 
 Guard itu menyembunyikan **CTA** selepas hidrasi. Ia tidak menghalang
 **navigasi**. Pengguna yang tiba di URL checkout langganan secara langsung —
@@ -159,7 +166,7 @@ Tiada satu pun boleh diselesaikan dengan kod:
 bermakna tiada R8 — saiz artifak lebih besar dan tiada obfuskasi. Untuk shell
 WebView yang hampir tiada logik Java, kesannya kecil.
 
-Dasar privasi tidak menamakan entiti undang-undang atau nombor SSM; ia
-menyenaraikan e-mel hubungan sahaja. Play tidak mewajibkan nombor SSM, tetapi
-identiti pembangun yang disahkan akan dipaparkan pada senarai kedai secara
-berasingan.
+Dasar privasi menamakan entiti dengan lengkap — Corallium Tech,
+No. Pendaftaran SPA/2026/6433, berkuat kuasa 24 Ogos 2026, dwibahasa, dan
+menyebut Corallium Flow secara khusus. `FLOW_TERMS_VERSION` (`"2026-08-24"`)
+sepadan dengan tarikh berkuat kuasa itu.
