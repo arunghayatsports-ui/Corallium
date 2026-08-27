@@ -57,9 +57,30 @@ Itu tidak lagi benar. Kod sekarang:
 - `lib/flow/platform/push.ts` melaksanakan pendaftaran FCM sepenuhnya
 - Aplikasi kini pada versionCode 4 / versionName 1.3
 
-`@capacitor/push-notifications` mengisytihar `POST_NOTIFICATIONS` dalam
-manifestnya sendiri, dan manifest itu **bergabung** ke dalam manifest akhir.
-Jadi manifest tergabung bukan lagi `INTERNET` sahaja, walaupun sumbernya begitu.
+Kebenaran itu **tidak** datang daripada manifest plugin. Manifest
+`@capacitor/push-notifications` sendiri hanya mengisytihar satu
+`MessagingService` — tiada `uses-permission` langsung. Rantaian sebenar melalui
+kebergantungan:
+
+```
+:capacitor-push-notifications
+  └── com.google.firebase:firebase-messaging
+        └── AndroidManifest.xml mengisytihar:
+              ACCESS_NETWORK_STATE
+              POST_NOTIFICATIONS
+              WAKE_LOCK
+```
+
+Ketiga-tiganya bergabung ke dalam manifest akhir. Sumber `AndroidManifest.xml`
+memang kekal `INTERNET` sahaja — tetapi artifak yang dimuat naik ke Play membawa
+**empat** kebenaran.
+
+Ia juga tidak bergantung pada `google-services.json`. Fail itu mengawal sama ada
+plugin Gradle `com.google.gms.google-services` digunakan; kebergantungan
+`firebase-messaging` masuk tanpa syarat melalui
+`implementation project(':capacitor-push-notifications')`. Jadi kebenaran itu ada
+dalam artifak walaupun push tidak pernah berfungsi.
+
 
 Ini tepat kegagalan yang dokumen itu sendiri beri amaran — "Dokumen itu
 mendahului kod, dan borang Play Console yang diisi daripadanya akan mengandungi
@@ -100,37 +121,34 @@ pilihan paling teruk daripada kedua-duanya.
 
 ---
 
-## Jurang C — `allowNavigation` tidak dapat membezakan dua jenis bayaran
+## Disahkan selamat — laluan bayar dalam bungkusan native
 
-`capacitor.config.ts` membenarkan navigasi ke `*.billplz.com` dan `billplz.com`.
-Sebabnya sah dan dinyatakan dalam kod: pelanggan pemilik perniagaan membayar
-kutipan melalui navigasi, dan tanpa hos itu "Bayar sekarang" mati senyap dalam
-WebView. Bayaran untuk **kerja perkhidmatan dunia sebenar** memang dikecualikan
-daripada Play Billing.
+Versi terdahulu menyenaraikan ini sebagai satu jurang, dengan alasan
+`allowNavigation` membenarkan `*.billplz.com` di peringkat hos dan kerana itu
+tidak dapat membezakan kutipan pelanggan (dikecualikan) daripada bayaran
+langganan Flow. Pengesahan terhadap kod menunjukkan kebimbangan itu tidak
+berasas:
 
-Tetapi senarai itu di peringkat **hos**, bukan laluan. Hos yang sama juga
-membenarkan bayaran **langganan Flow** dibuka di dalam aplikasi — dan itulah
-tepat yang `WebPurchaseGuard` wujud untuk halang.
+- **Tiada laluan checkout langganan Flow wujud.** Satu-satunya laluan checkout
+  Flow ialah `app/api/flow/collect/checkout/route.ts` — pelanggan perniagaan
+  membayar pemilik, iaitu perkhidmatan dunia sebenar yang dikecualikan daripada
+  Play Billing.
+- **CTA pelan Pro ialah WhatsApp dan e-mel**, bukan checkout. Dalam
+  `flow-pricing-page.tsx` seluruh blok itu — badan *dan* butang — dibalut
+  `WebPurchaseGuard`, bukan butang sahaja.
+- **Gantian native tidak menyebut tempat mahupun cara membeli:** "Naik taraf
+  tidak tersedia dalam aplikasi ini." Komen dalam
+  `lib/i18n/flow-dashboard-modules/entitlement.ts` menyatakan itu disengajakan.
+- Dasar privasi mengesahkan modelnya: yuran langganan dibayar kepada Corallium
+  Tech **melalui invois** dengan pindahan bank atau FPX, bukan checkout layan
+  diri.
 
-Kedudukannya lebih baik daripada yang disangka pada mulanya: dasar privasi
-menyatakan yuran langganan dibayar kepada Corallium Tech **melalui invois**,
-dengan pindahan bank atau FPX — bukan checkout layan diri dalam aplikasi. Jadi
-tiada halaman checkout langganan untuk ditemui secara tidak sengaja. Yang
-tinggal ialah **pautan bayar invois**: kalau pautan itu boleh dibuka di dalam
-WebView, ia bayaran langganan digital di luar Play Billing dari dalam aplikasi.
+Jadi `*.billplz.com` dalam `allowNavigation` hanya melayani aliran kutipan yang
+dikecualikan. Tiada jemputan membeli, tiada URL, tiada kaedah dalam bungkusan
+native.
 
-Guard itu menyembunyikan **CTA** selepas hidrasi. Ia tidak menghalang
-**navigasi**. Pengguna yang tiba di URL checkout langganan secara langsung —
-melalui penanda buku, pautan e-mel yang dibuka dalam aplikasi, atau ubah hala
-selepas sesuatu aliran — masih akan mendarat pada Billplz di dalam WebView.
 
-**Tindakan:** sahkan bahawa tiada laluan checkout langganan boleh dicapai dalam
-bungkusan native. Kalau ada, halang di peringkat navigasi (bukan hanya CTA),
-atau paksa ia dibuka dalam pelayar luaran.
-
----
-
-## Jurang D — Minimum Functionality
+## Jurang C — Minimum Functionality
 
 `capacitor.config.ts` sendiri mencatat risiko ini:
 
@@ -152,7 +170,7 @@ Tiada satu pun boleh diselesaikan dengan kod:
 - [ ] Borang **Data safety** — bergantung pada keputusan Jurang B
 - [ ] **Penilaian kandungan** (soal selidik IARC)
 - [ ] **Target audience and content**
-- [ ] **App access** — akaun ujian berfungsi + nota keupayaan asli (Jurang D)
+- [ ] **App access** — akaun ujian berfungsi + nota keupayaan asli (Jurang C)
 - [ ] **Aset kedai** — ikon 512×512, grafik ciri 1024×500, 2–8 tangkapan skrin telefon, tangkapan skrin tablet 7" dan 10"
 - [ ] **Ujian tertutup** — 12 penguji, 14 hari berterusan (akaun peribadi selepas 13 Nov 2023); sejak 2026 Google turut menyemak penggunaan sebenar
 - [ ] **Permohonan akses produksi** selepas syarat 12/14 dipenuhi
