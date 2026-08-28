@@ -29,7 +29,7 @@ Dokumen `MIGRASI_31_OGOS_2026.md` telah dipadam atas sebab yang sama.
 | Saiz halaman 16 KB | AGP 8.13.0 + Gradle 8.14.3; tiada `.so` dikomit. Toolchain moden menjajarkan 16 KB secara lalai |
 | Tiada Play Billing untuk dimigrasi | Tiada rujukan `billingclient` di seluruh repo |
 | Gerbang penandatanganan | `android/app/build.gradle` — `gradle.taskGraph.whenReady` menggagalkan `bundleRelease` tanpa `key.properties`, dengan `signingConfig` tanpa syarat sebagai jaring kedua |
-| Sandaran sesi ditutup | `allowBackup="false"` — menghalang kuki `app_webview/` dipulihkan dalam keadaan sudah log masuk |
+| Sandaran awan sesi ditutup | `allowBackup="false"` — menghalang kuki `app_webview/` dipulihkan daripada sandaran awan dalam keadaan sudah log masuk. Ia TIDAK meliputi pemindahan peranti-ke-peranti pada API 31+; lihat `DATA_SAFETY_WORKSHEET.md` |
 | Halaman padam akaun | `app/padam-akaun/page.tsx` — memenuhi keperluan URL web Play |
 | Dasar privasi | `app/privasi/page.tsx` + `lib/i18n/legal/privacy-content.ts` |
 | Mitigasi dasar pembayaran | `components/flow/web-purchase-guard.tsx`, diguna pada `flow-pricing-page.tsx` dan `flow-plan-limit-notice.tsx` |

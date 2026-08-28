@@ -48,7 +48,7 @@ tinggalkan kerana "itu data pelanggan dia, bukan data dia".
 | Address | Ya | `flow_customers.address` |
 | Other info | Ya | `flow_customers.company_name`, `flow_customers.notes` |
 
-Tujuan: App functionality. Dikongsi: lihat jadual pihak ketiga di bawah.
+Tujuan: App functionality. Dikongsi: nilai mengikut bahagian Pihak ketiga di bawah — kemungkinan besar TIDAK.
 Diperlukan atau pilihan: nama diperlukan (`name TEXT NOT NULL`), selebihnya
 pilihan.
 
@@ -120,11 +120,15 @@ dalam `lib/flow/agent/tools.ts` boleh membaca — antaranya — `cari_pelanggan`
 Maknanya **maklumat peribadi pelanggan mengalir ke API Anthropic** apabila
 Agent dihidupkan dalam produksi.
 
-- **Jika Agent hidup dalam produksi** → isytihar Personal info dan Financial
-  info sebagai **dikongsi** dengan pihak ketiga, dan sebut pemprosesan AI dalam
-  dasar privasi.
-- **Jika Agent dimatikan dalam produksi** → tiada perkongsian untuk diisytihar
-  daripada laluan ini.
+- **Jika Agent hidup dalam produksi** → sebut pemprosesan AI dalam dasar
+  privasi, dan sahkan akaun Anthropic anda berada di bawah terma perniagaan
+  yang mengehadkan penggunaan kepada memproses bagi pihak anda. Di bawah terma
+  itu Anthropic ialah penyedia perkhidmatan, jadi laluan ini **tidak** menjadi
+  "dikongsi" pada borang — lihat bahagian Pihak ketiga. Jika anda tidak dapat
+  mengesahkan terma itu, tanda Personal info dan Financial info sebagai
+  dikongsi.
+- **Jika Agent dimatikan dalam produksi** → tiada aliran langsung kepada
+  Anthropic untuk didedahkan langsung.
 
 Semak nilai sebenar pembolehubah persekitaran produksi sebelum menjawab.
 
@@ -132,15 +136,41 @@ Semak nilai sebenar pembolehubah persekitaran produksi sebelum menjawab.
 
 ## Pihak ketiga
 
-| Pihak | Data | Syarat |
-|---|---|---|
-| Supabase | Semua data aplikasi — auth, pangkalan data, storan foto | Sentiasa |
-| Billplz | Jumlah bil, rujukan, maklumat pembayar | Sentiasa (aliran kutipan) |
-| Vercel | Hosting dan log permintaan | Sentiasa |
-| Google (FCM) | Token peranti | Hanya jika `google-services.json` ditambah |
-| Anthropic | Kandungan yang alat Agent baca, termasuk PII pelanggan | Hanya jika Agent dihidupkan |
+**Jangan tanda semua ini sebagai "dikongsi".** Play mentakrifkan *sharing*
+sebagai pemindahan kepada pihak ketiga, tetapi ia mengecualikan beberapa jenis
+pemindahan secara khusus — antaranya pemindahan kepada **penyedia perkhidmatan**
+yang memproses data bagi pihak pembangun mengikut arahan, terma kontrak dan
+dasar pembangun itu. Menanda pemproses sebagai "dikongsi" menghasilkan label
+Data safety yang tidak tepat, dan label tidak tepat itulah punca penolakan
+paling kerap.
 
-Setiap satu perlu muncul dalam dasar privasi. Dasar semasa
+| Pihak | Data | Peranan Play | Syarat |
+|---|---|---|---|
+| Supabase | Semua data aplikasi — auth, pangkalan data, storan foto | Penyedia perkhidmatan — hos data bagi pihak anda | Sentiasa |
+| Vercel | Hosting dan log permintaan | Penyedia perkhidmatan — infrastruktur | Sentiasa |
+| Google (FCM) | Token peranti | Penyedia perkhidmatan — penghantaran push | Hanya jika `google-services.json` ditambah |
+| Anthropic | Kandungan yang alat Agent baca, termasuk PII pelanggan | Penyedia perkhidmatan — memproses mengikut arahan anda | Hanya jika Agent dihidupkan |
+| Billplz | Jumlah bil, rujukan, maklumat pembayar | Gerbang bayaran; pemindahan dimulakan pengguna semasa membayar | Sentiasa (aliran kutipan) |
+
+Kesimpulan bagi Flow seperti kod berdiri sekarang: **data DIKUMPUL, tetapi
+tiada satu pun laluan di atas yang jelas menjadi "dikongsi"** — setiap penerima
+bertindak sebagai pemproses bagi pihak anda, dan laluan Billplz dimulakan oleh
+pengguna sendiri.
+
+Dua syarat yang mesti anda sahkan sebelum bergantung pada pengecualian itu:
+
+1. **Kontrak wujud dan mengehadkan penggunaan.** Pengecualian penyedia
+   perkhidmatan bergantung pada terma yang mengikat penerima untuk memproses
+   mengikut arahan anda sahaja. Terma perniagaan standard Supabase, Vercel,
+   Google dan Anthropic memang begitu — tetapi ia terpakai kepada akaun anda,
+   jadi sahkan anda berada di bawah terma tersebut, bukan pelan percuma dengan
+   syarat berbeza.
+2. **Penerima tidak menggunakan data untuk tujuannya sendiri.** Sebaik sahaja
+   mana-mana pihak menggunakan data itu untuk tujuan sendiri, pengecualian
+   gugur dan ia menjadi perkongsian sebenar.
+
+Setiap satu tetap perlu muncul dalam dasar privasi — pengecualian *sharing*
+dalam borang Play tidak membatalkan kewajipan pendedahan privasi. Dasar semasa
 (`lib/i18n/legal/privacy-content.ts`) sudah menyebut aliran bayaran; semak sama
 ada ia menyebut Anthropic jika Agent akan hidup.
 
@@ -155,8 +185,17 @@ ada ia menyebut Anthropic jika Agent akan hidup.
 | Anda mengikut Families Policy | Bergantung | Hanya jika Target audience merangkumi kanak-kanak |
 
 Nota tambahan yang menyokong borang: `allowBackup="false"` menghalang kuki sesi
-WebView masuk ke Google Backup dan pemindahan peranti — bukan soalan borang,
-tetapi ia menguatkan jawapan keselamatan anda.
+WebView masuk ke sandaran awan Google — bukan soalan borang, tetapi ia
+menguatkan jawapan keselamatan anda.
+
+**Ia tidak meliputi pemindahan peranti-ke-peranti.** Dokumentasi Android
+menyatakannya secara jelas untuk aplikasi yang mensasarkan Android 12 (API 31)
+ke atas: pada peranti sesetengah pengeluar, `allowBackup="false"` mematikan
+sandaran awan *tetapi tidak* mematikan pemindahan D2D. Flow mensasarkan API 36,
+jadi ini terpakai. Untuk menutup laluan itu juga, gunakan
+`android:dataExtractionRules` dengan bahagian `<device-transfer>` yang
+mengecualikan direktori WebView — kemudian sahkan dengan ujian pemindahan
+sebenar, bukan dengan membaca manifest.
 
 ---
 
@@ -165,7 +204,9 @@ tetapi ia menguatkan jawapan keselamatan anda.
 1. Putuskan dua suis di atas — push dan Agent. Semuanya bergantung padanya.
 2. Isi Data collected menggunakan jadual di atas.
 3. Bagi setiap jenis: tujuan **App functionality** melainkan ada sebab lain.
-4. Bagi setiap jenis: tanda **dikongsi** mengikut jadual pihak ketiga.
+4. Bagi setiap jenis: nilai *sharing* mengikut PERANAN setiap penerima dalam
+   jadual pihak ketiga — bukan sekadar kehadirannya. Pemproses bagi pihak anda
+   tidak dikira sebagai dikongsi.
 5. Sahkan dasar privasi menyenaraikan setiap pihak ketiga yang anda tanda.
 6. Sahkan manifest tergabung sepadan — lihat `PLAY_CONSOLE_READINESS.md` Jurang A.
 
