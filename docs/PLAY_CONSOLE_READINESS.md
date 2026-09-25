@@ -105,10 +105,17 @@ Kemas kini jadual dalam `FLOW_ANDROID_RELEASE.md` supaya sepadan versionCode 4.
 `com.google.gms.google-services` tidak digunakan dan pendaftaran FCM gagal —
 `push.ts` menelan kegagalan itu secara senyap, dengan sengaja.
 
-Kesan bersihnya: aplikasi menghantar kebenaran notifikasi untuk ciri yang tidak
-pernah berfungsi. Pengguna melihat gesaan; tiada notifikasi pernah tiba.
+**Dikemas kini 25 Sept 2026: pengguna tidak lagi melihat gesaan.** `main` kini
+menggerbang pendaftaran di belakang suis binaan web
+`NEXT_PUBLIC_FLOW_PUSH_ENABLED`, disemak dalam `isPushSupported()` SEBELUM
+`requestPermissions()`. Suis itu tidak ditetapkan dalam produksi, jadi dialog
+kebenaran tidak pernah dipaparkan dan tiada token dikumpul.
+`POST_NOTIFICATIONS` masih diisytiharkan dalam manifest tergabung, tetapi tidak
+pernah diminta.
 
-**Putuskan sebelum penghantaran — dua pilihan sahaja:**
+Jadi keadaan sekarang **tidak menyekat ujian tertutup**, dan Data safety
+dijawab Device or other IDs = Tidak (lihat `DATA_SAFETY_WORKSHEET.md`).
+Keputusan di bawah masih perlu diambil sebelum produksi:
 
 1. **Tambah `google-services.json`** dan hidupkan push. Maka token FCM ialah
    pengecam peranti, dan **mesti** diisytihar dalam borang Data safety
@@ -116,8 +123,9 @@ pernah berfungsi. Pengguna melihat gesaan; tiada notifikasi pernah tiba.
 2. **Buang plugin push** daripada binaan. `POST_NOTIFICATIONS` kemudian keluar
    daripada manifest tergabung, dan borang Data safety kekal lebih ringkas.
 
-Menghantar dalam keadaan sekarang — plugin ada, konfigurasi tiada — ialah
-pilihan paling teruk daripada kedua-duanya.
+Jika pilihan 1 diambil: kemas kini borang Data safety **sebelum** menetapkan
+`NEXT_PUBLIC_FLOW_PUSH_ENABLED=1` di Vercel. Suis itu mengubah kelakuan aplikasi
+tanpa sebarang muat naik ke Play.
 
 ---
 
@@ -167,7 +175,7 @@ sebagai pelayar semata-mata.
 
 Tiada satu pun boleh diselesaikan dengan kod:
 
-- [ ] Borang **Data safety** — bergantung pada keputusan Jurang B
+- [ ] Borang **Data safety** — jawapan muktamad dalam `DATA_SAFETY_WORKSHEET.md` (disemak 25 Sept 2026)
 - [ ] **Penilaian kandungan** (soal selidik IARC)
 - [ ] **Target audience and content**
 - [ ] **App access** — akaun ujian berfungsi + nota keupayaan asli (Jurang C)
